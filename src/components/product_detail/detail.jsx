@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getProducts } from '../../service/fecher';
 
-export const Detail = ({ convertPrice }) => {
+export const Detail = ({ convertPrice, cart, setCart }) => {
     const { id } = useParams();
     const [product, setProduct] = useState({});
     const [count, setCount] = useState(1);
@@ -21,6 +21,37 @@ export const Detail = ({ convertPrice }) => {
             setProduct(data.data.products.find((product) => product.id === parseInt(id)));
         });
     }, [id]);
+
+    //장바구니 중복된 물건
+    const setQuantity = (id, quantity) => {
+        const found = cart.filter((el) => el.id === id)[0];
+        const idx = cart.indexOf(found);
+        const cartItem = {
+            id: product.id,
+            image: product.image,
+            name: product.name,
+            price: product.price,
+            provider: product.price,
+            quantity: quantity,
+        };
+        setCart([...cart.slice(0, idx), cartItem, ...cart.slice(idx + 1)]);
+    };
+
+    //장바구니에 물건
+    const handleCart = () => {
+        const cartItem = {
+            id: product.id,
+            image: product.image,
+            name: product.name,
+            price: product.price,
+            provider: product.price,
+            quantity: count,
+        };
+        const found = cart.find((el) => el.id === cartItem.id);
+        if (found) setQuantity(cartItem.id, found.quantity + count);
+        else setCart([...cart, cartItem]);
+    };
+
     return (
         product && (
             <>
@@ -90,7 +121,9 @@ export const Detail = ({ convertPrice }) => {
 
                         <div className={styles.btn}>
                             <button className={styles.btn_buy}>바로 구매</button>
-                            <button className={styles.btn_cart}>장바구니</button>
+                            <button className={styles.btn_cart} onClick={() => handleCart()}>
+                                장바구니
+                            </button>
                         </div>
                     </section>
                 </main>
